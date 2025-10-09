@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function OfferCard() {
   return (
     <article className="cities__card place-card">

@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function OfferPage() {
   const gallery = [
     { id: 'room', src: 'img/room.jpg' },
