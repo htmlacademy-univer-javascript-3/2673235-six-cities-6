@@ -7,6 +7,21 @@ type OfferCardProps = {
   variant?: 'main' | 'favorites' | 'near';
 };
 
+function formatType(t: Offer['type']): string {
+  switch (t) {
+    case 'apartment':
+      return 'Apartment';
+    case 'room':
+      return 'Room';
+    case 'house':
+      return 'House';
+    case 'hotel':
+      return 'Hotel';
+    default:
+      return String(t);
+  }
+}
+
 export default function OfferCard({ offer, onHover, variant = 'main' }: OfferCardProps) {
   const { id, title, type, price, rating, isPremium, isFavorite, previewImage } = offer;
 
@@ -34,11 +49,6 @@ export default function OfferCard({ offer, onHover, variant = 'main' }: OfferCar
   let bookmarkClass = 'place-card__bookmark-button button';
   if (isFavorite) {
     bookmarkClass = 'place-card__bookmark-button place-card__bookmark-button--active button';
-  }
-
-  let humanType = type;
-  if (type.length > 0) {
-    humanType = type.charAt(0).toUpperCase() + type.slice(1);
   }
 
   const ratingWidth = Math.round(rating) * 20;
@@ -94,7 +104,7 @@ export default function OfferCard({ offer, onHover, variant = 'main' }: OfferCar
         <h2 className="place-card__name">
           <Link to={`/offer/${id}`}>{title}</Link>
         </h2>
-        <p className="place-card__type">{humanType}</p>
+        <p className="place-card__type">{formatType(offer.type)}</p>
       </div>
     </article>
   );
