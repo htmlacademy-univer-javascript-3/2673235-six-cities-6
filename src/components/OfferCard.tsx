@@ -23,7 +23,7 @@ function formatType(t: Offer['type']): string {
 }
 
 export default function OfferCard({ offer, onHover, variant = 'main' }: OfferCardProps) {
-  const { id, title, type, price, rating, isPremium, isFavorite, previewImage } = offer;
+  const { id, title, price, rating, isPremium, isFavorite, previewImage } = offer;
 
   let imgWidth = 260;
   let imgHeight = 200;

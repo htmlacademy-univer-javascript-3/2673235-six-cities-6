@@ -1,10 +1,18 @@
 import { useState } from 'react';
 
 function titleFor(star: number) {
-  if (star === 5) return 'perfect';
-  if (star === 4) return 'good';
-  if (star === 3) return 'not bad';
-  if (star === 2) return 'badly';
+  if (star === 5) {
+    return 'perfect';
+  }
+  if (star === 4) {
+    return 'good';
+  }
+  if (star === 3) {
+    return 'not bad';
+  }
+  if (star === 2) {
+    return 'badly';
+  }
   return 'terribly';
 }
 
