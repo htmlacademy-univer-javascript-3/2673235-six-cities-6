@@ -1,49 +1,110 @@
-export default function OfferCard() {
-  return (
-    <article className="cities__card place-card">
-      <div className="place-card__mark">
-        <span>Premium</span>
-      </div>
+import { Link } from 'react-router-dom';
+import type { Offer } from '../mocks/offers';
 
-      <div className="cities__image-wrapper place-card__image-wrapper">
-        <a href="#">
+type OfferCardProps = {
+  offer: Offer;
+  onHover?: (id: string | null) => void;
+  variant?: 'main' | 'favorites' | 'near';
+};
+
+function formatType(t: Offer['type']): string {
+  switch (t) {
+    case 'apartment':
+      return 'Apartment';
+    case 'room':
+      return 'Room';
+    case 'house':
+      return 'House';
+    case 'hotel':
+      return 'Hotel';
+    default:
+      return String(t);
+  }
+}
+
+export default function OfferCard({ offer, onHover, variant = 'main' }: OfferCardProps) {
+  const { id, title, price, rating, isPremium, isFavorite, previewImage } = offer;
+
+  let imgWidth = 260;
+  let imgHeight = 200;
+  if (variant === 'favorites') {
+    imgWidth = 150;
+    imgHeight = 110;
+  }
+
+  let cardClass = 'cities__card place-card';
+  if (variant === 'favorites') {
+    cardClass = 'favorites__card place-card';
+  } else if (variant === 'near') {
+    cardClass = 'near-places__card place-card';
+  }
+
+  let imgWrapperClass = 'cities__image-wrapper place-card__image-wrapper';
+  if (variant === 'favorites') {
+    imgWrapperClass = 'favorites__image-wrapper place-card__image-wrapper';
+  } else if (variant === 'near') {
+    imgWrapperClass = 'near-places__image-wrapper place-card__image-wrapper';
+  }
+
+  let bookmarkClass = 'place-card__bookmark-button button';
+  if (isFavorite) {
+    bookmarkClass = 'place-card__bookmark-button place-card__bookmark-button--active button';
+  }
+
+  const ratingWidth = Math.round(rating) * 20;
+
+  return (
+    <article
+      className={cardClass}
+      onMouseEnter={() => onHover?.(id)}
+      onMouseLeave={() => onHover?.(null)}
+    >
+      {isPremium && (
+        <div className="place-card__mark">
+          <span>Premium</span>
+        </div>
+      )}
+
+      <div className={imgWrapperClass}>
+        <Link to={`/offer/${id}`}>
           <img
             className="place-card__image"
-            src="img/apartment-01.jpg"
-            width="260"
-            height="200"
-            alt="Place image"
+            src={previewImage}
+            width={imgWidth}
+            height={imgHeight}
+            alt={title}
           />
-        </a>
+        </Link>
       </div>
 
       <div className="place-card__info">
         <div className="place-card__price-wrapper">
           <div className="place-card__price">
-            <b className="place-card__price-value">€120</b>
+            <b className="place-card__price-value">€{price}</b>
             <span className="place-card__price-text">/ night</span>
           </div>
 
-          <button className="place-card__bookmark-button button" type="button">
+          <button className={bookmarkClass} type="button">
             <svg className="place-card__bookmark-icon" width="18" height="19">
               <use xlinkHref="#icon-bookmark"></use>
             </svg>
-            <span className="visually-hidden">To bookmarks</span>
+            <span className="visually-hidden">
+              {isFavorite ? 'In bookmarks' : 'To bookmarks'}
+            </span>
           </button>
         </div>
 
         <div className="place-card__rating rating">
           <div className="place-card__stars rating__stars">
-            <span style={{ width: '80%' }}></span>
+            <span style={{ width: `${ratingWidth}%` }}></span>
             <span className="visually-hidden">Rating</span>
           </div>
         </div>
 
         <h2 className="place-card__name">
-          <a href="#">Beautiful &amp; luxurious apartment at great location</a>
+          <Link to={`/offer/${id}`}>{title}</Link>
         </h2>
-
-        <p className="place-card__type">Apartment</p>
+        <p className="place-card__type">{formatType(offer.type)}</p>
       </div>
     </article>
   );
