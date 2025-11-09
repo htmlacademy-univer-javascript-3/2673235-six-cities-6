@@ -8,6 +8,7 @@ export type Offer = {
   isFavorite: boolean;
   previewImage: string;
   city: 'Paris' | 'Cologne' | 'Brussels' | 'Amsterdam' | 'Hamburg' | 'Dusseldorf';
+  location: { lat: number; lng: number };
 };
 
 export const offers: Offer[] = [
@@ -21,6 +22,7 @@ export const offers: Offer[] = [
     isFavorite: false,
     previewImage: 'img/apartment-01.jpg',
     city: 'Amsterdam',
+    location: { lat: 52.3909553943508, lng: 4.85309666406198 },
   },
   {
     id: '1702',
@@ -32,6 +34,7 @@ export const offers: Offer[] = [
     isFavorite: true,
     previewImage: 'img/room.jpg',
     city: 'Amsterdam',
+    location: { lat: 52.3609553943508, lng: 4.85309666406198 },
   },
   {
     id: '1703',
@@ -43,6 +46,7 @@ export const offers: Offer[] = [
     isFavorite: false,
     previewImage: 'img/apartment-02.jpg',
     city: 'Amsterdam',
+    location: { lat: 52.3909553943508, lng: 4.929309666406198 },
   },
   {
     id: '1704',
@@ -53,6 +57,7 @@ export const offers: Offer[] = [
     isPremium: true,
     isFavorite: true,
     previewImage: 'img/apartment-03.jpg',
-    city: 'Cologne',
+    city: 'Amsterdam',
+    location: { lat: 52.3809553943508, lng: 4.939309666406198 },
   },
 ];

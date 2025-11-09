@@ -1,4 +1,5 @@
 import OffersList from '../components/OffersList';
+import Map from '../components/Map';
 import type { Offer } from '../mocks/offers';
 
 type MainPageProps = {
@@ -6,6 +7,8 @@ type MainPageProps = {
 };
 
 export default function MainPage({ offers }: MainPageProps) {
+  const amsterdamOffers = offers.filter((o) => o.city === 'Amsterdam');
+
   return (
     <div className="page page--gray page--main">
       <header className="header">
@@ -56,7 +59,7 @@ export default function MainPage({ offers }: MainPageProps) {
           <div className="cities__places-container container">
             <section className="cities__places places">
               <h2 className="visually-hidden">Places</h2>
-              <b className="places__found">{offers.length} places to stay in Amsterdam</b>
+              <b className="places__found">{amsterdamOffers.length} places to stay in Amsterdam</b>
 
               <form className="places__sorting" action="#" method="get">
                 <span className="places__sorting-caption">Sort by</span>
@@ -74,11 +77,13 @@ export default function MainPage({ offers }: MainPageProps) {
                 </ul>
               </form>
 
-              <OffersList offers={offers} />
+              <OffersList offers={amsterdamOffers} />
             </section>
 
             <div className="cities__right-section">
-              <section className="cities__map map"></section>
+              <section className="cities__map map">
+                <Map offers={amsterdamOffers} />
+              </section>
             </div>
           </div>
         </div>
