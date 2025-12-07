@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainPage from './pages/MainPage';
 import LoginPage from './pages/LoginPage';
 import FavoritesPage from './pages/FavoritesPage';
@@ -14,20 +14,27 @@ type AppProps = {
 
 export default function App({ offers, isAuthorized }: AppProps) {
   const favoriteOffers = offers.filter((o) => o.isFavorite);
+
   return (
-    <Routes>
-      <Route path="/" element={<MainPage offers={offers} />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route
-        path="/favorites"
-        element={
-          <PrivateRoute isAuthorized={isAuthorized}>
-            <FavoritesPage offers={favoriteOffers} />
-          </PrivateRoute>
-        }
-      />
-      <Route path="/offer/:id" element={<OfferPage />} />
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MainPage />} />
+
+        <Route path="/login" element={<LoginPage />} />
+
+        <Route
+          path="/favorites"
+          element={
+            <PrivateRoute isAuthorized={isAuthorized}>
+              <FavoritesPage offers={favoriteOffers} />
+            </PrivateRoute>
+          }
+        />
+
+        <Route path="/offer/:id" element={<OfferPage />} />
+
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
