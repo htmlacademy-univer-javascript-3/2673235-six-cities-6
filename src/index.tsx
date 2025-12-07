@@ -5,17 +5,16 @@ import 'leaflet/dist/leaflet.css';
 
 import { Provider } from 'react-redux';
 import { store } from './store';
-import { loadOffers } from './store/action';
-import { offers } from './mocks/offers';
+import { fetchOffers } from './store/action';
 
 const IS_AUTHORIZED = false;
 
-store.dispatch(loadOffers(offers));
+store.dispatch(fetchOffers());
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <Provider store={store}>
-      <App offers={offers} isAuthorized={IS_AUTHORIZED} />
+      <App isAuthorized={IS_AUTHORIZED} />
     </Provider>
   </React.StrictMode>,
 );
