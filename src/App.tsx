@@ -1,18 +1,19 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import MainPage from './pages/MainPage';
-import LoginPage from './pages/LoginPage';
 import FavoritesPage from './pages/FavoritesPage';
 import OfferPage from './pages/OfferPage';
+import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import PrivateRoute from './components/PrivateRoute';
-import type { Offer } from './mocks/offers';
+import type { RootState } from './store';
 
 type AppProps = {
-  offers: Offer[];
   isAuthorized: boolean;
 };
 
-export default function App({ offers, isAuthorized }: AppProps) {
+export default function App({ isAuthorized }: AppProps) {
+  const offers = useSelector((state: RootState) => state.offers);
   const favoriteOffers = offers.filter((o) => o.isFavorite);
 
   return (

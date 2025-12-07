@@ -1,5 +1,5 @@
+import type { Offer } from '../store/reducer';
 import OffersList from '../components/OffersList';
-import type { Offer } from '../mocks/offers';
 
 type FavoritesPageProps = {
   offers: Offer[];
@@ -16,25 +16,36 @@ export default function FavoritesPage({ offers }: FavoritesPageProps) {
 
   const cities = Object.keys(grouped);
 
-  let content = <p style={{ padding: 16 }}>Nothing yet saved</p>;
-  if (cities.length > 0) {
-    content = (
+  const content =
+    cities.length === 0 ? (
+      <section className="favorites favorites--empty">
+        <h1 className="visually-hidden">Favorites (empty)</h1>
+        <div className="favorites__status-wrapper">
+          <b className="favorites__status">Nothing yet saved.</b>
+          <p className="favorites__status-description">
+            Save properties to narrow down search or plan your future trips.
+          </p>
+        </div>
+      </section>
+    ) : (
       <ul className="favorites__list">
         {cities.map((city) => (
           <li className="favorites__locations-items" key={city}>
             <div className="favorites__locations locations locations--current">
               <div className="locations__item">
-                <a className="locations__item-link" href="#todo">
+                <a className="locations__item-link" href="#">
                   <span>{city}</span>
                 </a>
               </div>
             </div>
-            <OffersList offers={grouped[city]} variant="favorites" />
+
+            <div className="favorites__places">
+              <OffersList offers={grouped[city]} variant="favorites" />
+            </div>
           </li>
         ))}
       </ul>
     );
-  }
 
   return (
     <div className="page">
