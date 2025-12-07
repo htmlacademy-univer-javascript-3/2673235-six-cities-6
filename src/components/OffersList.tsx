@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import type { Offer } from '../store/reducer';
 import OfferCard from './OfferCard';
 
@@ -8,28 +8,45 @@ type OffersListProps = {
   onActiveChange?: (id: string | null) => void;
 };
 
-export default function OffersList({ offers, variant = 'main', onActiveChange }: OffersListProps) {
+function OffersListComponent({
+  offers,
+  variant = 'main',
+  onActiveChange,
+}: OffersListProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  const handleHover = (id: string | null) => {
-    setActiveId(id);
-    if (onActiveChange) {
-      onActiveChange(id);
-    }
-  };
+  const handleHover = useCallback(
+    (id: string | null) => {
+      setActiveId(id);
 
-  let listClass = 'cities__places-list places__list tabs__content';
-  if (variant === 'favorites') {
+      if (onActiveChange) {
+        onActiveChange(id);
+      }
+    },
+    [onActiveChange],
+  );
+
+  let listClass = 'near-places__list places__list';
+
+  if (variant === 'main') {
+    listClass = 'cities__places-list places__list tabs__content';
+  } else if (variant === 'favorites') {
     listClass = 'favorites__places';
-  } else if (variant === 'near') {
-    listClass = 'near-places__list places__list';
   }
 
   return (
     <div className={listClass} data-active-id={activeId ?? ''}>
       {offers.map((offer) => (
-        <OfferCard key={offer.id} offer={offer} onHover={handleHover} variant={variant} />
+        <OfferCard
+          key={offer.id}
+          offer={offer}
+          onHover={handleHover}
+          variant={variant}
+        />
       ))}
     </div>
   );
 }
+
+export const OffersList = memo(OffersListComponent);
+export default OffersList;

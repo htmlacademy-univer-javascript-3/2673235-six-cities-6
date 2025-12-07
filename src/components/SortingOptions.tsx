@@ -1,27 +1,20 @@
 import { useState } from 'react';
-
-export type SortType =
-  | 'Popular'
-  | 'PriceLowToHigh'
-  | 'PriceHighToLow'
-  | 'TopRatedFirst';
+import type { SortType } from '../types/sort-type';
 
 type SortingOptionsProps = {
   sortType: SortType;
   onChange: (value: SortType) => void;
 };
 
-export default function SortingOptions({ sortType, onChange }: SortingOptionsProps) {
+const SORTING_OPTIONS: { value: SortType; label: string }[] = [
+  { value: 'Popular', label: 'Popular' },
+  { value: 'PriceLowToHigh', label: 'Price: low to high' },
+  { value: 'PriceHighToLow', label: 'Price: high to low' },
+  { value: 'TopRatedFirst', label: 'Top rated first' },
+];
+
+function SortingOptions({ sortType, onChange }: SortingOptionsProps) {
   const [isOpen, setIsOpen] = useState(false);
-
-  const options: { value: SortType; label: string }[] = [
-    { value: 'Popular', label: 'Popular' },
-    { value: 'PriceLowToHigh', label: 'Price: low to high' },
-    { value: 'PriceHighToLow', label: 'Price: high to low' },
-    { value: 'TopRatedFirst', label: 'Top rated first' },
-  ];
-
-  const current = options.find((o) => o.value === sortType) ?? options[0];
 
   const handleToggle = () => {
     setIsOpen((prev) => !prev);
@@ -32,17 +25,21 @@ export default function SortingOptions({ sortType, onChange }: SortingOptionsPro
     setIsOpen(false);
   };
 
+  const currentLabel =
+    SORTING_OPTIONS.find((option) => option.value === sortType)?.label ??
+    'Popular';
+
   return (
     <form className="places__sorting" action="#" method="get">
-      <span className="places__sorting-caption">Sort by</span>
+      <span className="places__sorting-caption">Sort by</span>{' '}
       <span
         className="places__sorting-type"
         tabIndex={0}
         onClick={handleToggle}
       >
-        {current.label}
+        {currentLabel}
         <svg className="places__sorting-arrow" width="7" height="4">
-          <use xlinkHref="#icon-arrow-select"></use>
+          <use xlinkHref="#icon-arrow-select" />
         </svg>
       </span>
       <ul
@@ -50,7 +47,7 @@ export default function SortingOptions({ sortType, onChange }: SortingOptionsPro
           isOpen ? 'places__options--opened' : ''
         }`}
       >
-        {options.map((option) => (
+        {SORTING_OPTIONS.map((option) => (
           <li
             key={option.value}
             className={`places__option ${
@@ -66,3 +63,5 @@ export default function SortingOptions({ sortType, onChange }: SortingOptionsPro
     </form>
   );
 }
+
+export default SortingOptions;
