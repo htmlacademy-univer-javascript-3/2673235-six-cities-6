@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import L from 'leaflet';
+import L, { Map as LeafletMap, LayerGroup } from 'leaflet';
 import type { Offer } from '../store/reducer';
 
 type MapProps = {
@@ -9,42 +9,47 @@ type MapProps = {
 
 const defaultIcon = L.icon({
   iconUrl: 'img/pin.svg',
-  iconSize: [27, 39],
-  iconAnchor: [13.5, 39],
+  iconSize: [27, 39] as [number, number],
+  iconAnchor: [13.5, 39] as [number, number],
 });
 
 const activeIcon = L.icon({
   iconUrl: 'img/pin-active.svg',
-  iconSize: [27, 39],
-  iconAnchor: [13.5, 39],
+  iconSize: [27, 39] as [number, number],
+  iconAnchor: [13.5, 39] as [number, number],
 });
 
 export default function Map({ offers, activeOfferId }: MapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.LayerGroup | null>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const markersRef = useRef<LayerGroup | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) {
+    if (!containerRef.current || mapRef.current || offers.length === 0) {
       return;
     }
 
-    const center: [number, number] =
-      offers.length > 0
-        ? [offers[0].location.lat, offers[0].location.lng]
-        : [52.374, 4.889];
+    const firstOffer = offers[0];
+    const center: [number, number] = [
+      firstOffer.location.lat,
+      firstOffer.location.lng,
+    ];
+    const zoom = firstOffer.location.zoom;
 
-    mapRef.current = L.map(containerRef.current).setView(center, 12);
+    const map = L.map(containerRef.current).setView(center, zoom);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-    }).addTo(mapRef.current);
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map);
 
-    markersRef.current = L.layerGroup().addTo(mapRef.current);
+    const markers = L.layerGroup().addTo(map);
+
+    mapRef.current = map;
+    markersRef.current = markers;
   }, [offers]);
 
   useEffect(() => {
-    if (!markersRef.current) {
+    if (!mapRef.current || !markersRef.current) {
       return;
     }
 
@@ -53,12 +58,14 @@ export default function Map({ offers, activeOfferId }: MapProps) {
     offers.forEach((offer) => {
       const icon = offer.id === activeOfferId ? activeIcon : defaultIcon;
 
-      L.marker(
-        [offer.location.lat, offer.location.lng],
-        { icon }
-      ).addTo(markersRef.current as L.LayerGroup);
+      const position: [number, number] = [
+        offer.location.lat,
+        offer.location.lng,
+      ];
+
+      L.marker(position, { icon }).addTo(markersRef.current as LayerGroup);
     });
   }, [offers, activeOfferId]);
 
-  return <div style={{ height: '100%' }} ref={containerRef}></div>;
+  return <div style={{ height: '100%' }} ref={containerRef} />;
 }

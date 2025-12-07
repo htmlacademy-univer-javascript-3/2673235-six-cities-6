@@ -32,16 +32,16 @@ type ServerOffer = {
   title: string;
   type: 'apartment' | 'room' | 'house' | 'hotel';
   price: number;
+  rating: number;
+  isPremium: boolean;
+  isFavorite: boolean;
+  previewImage: string;
   city: ServerCity;
   location: {
     latitude: number;
     longitude: number;
     zoom: number;
   };
-  isFavorite: boolean;
-  isPremium: boolean;
-  rating: number;
-  previewImage: string;
 };
 
 type ServerUser = {
@@ -66,6 +66,7 @@ function adaptOfferToClient(offer: ServerOffer): Offer {
     location: {
       lat: offer.location.latitude,
       lng: offer.location.longitude,
+      zoom: offer.location.zoom,
     },
   };
 }
@@ -76,6 +77,7 @@ function adaptUserToClient(user: ServerUser): User {
     avatarUrl: user.avatarUrl,
     email: user.email,
     isPro: user.isPro,
+    token: user.token,
   };
 }
 
@@ -116,13 +118,16 @@ type LoginData = {
   password: string;
 };
 
-export const loginAction = (loginData: LoginData): ThunkResult<Promise<void>> => async (
+export const loginAction = (
+  loginData: LoginData,
+): ThunkResult<Promise<void>> => async (
   dispatch,
   _getState,
   api,
 ) => {
   const { data } = await api.post<ServerUser>('/login', loginData);
   saveToken(data.token);
+
   const user = adaptUserToClient(data);
   dispatch(setAuthorizationStatus(AuthorizationStatus.Auth));
   dispatch(setUser(user));

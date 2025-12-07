@@ -1,29 +1,29 @@
-import type { FC } from 'react';
-import ReviewItem, { type Review } from './ReviewItem';
+import type { Review } from '../types/review';
+import ReviewItem from './ReviewItem';
 
-type Props = {
+type ReviewsListProps = {
   items: Review[];
 };
 
-const ReviewsList: FC<Props> = ({ items }) => {
+function ReviewsList({ items }: ReviewsListProps) {
   const sorted = [...items].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
+
   const limited = sorted.slice(0, 10);
 
   return (
-    <section className="offer__reviews reviews">
+    <section className="property__reviews reviews">
       <h2 className="reviews__title">
-        Reviews · <span className="reviews__amount">{items.length}</span>
+        Reviews • <span className="reviews__amount">{limited.length}</span>
       </h2>
-
       <ul className="reviews__list">
-        {limited.map((r) => (
-          <ReviewItem key={r.id} review={r} />
+        {limited.map((review) => (
+          <ReviewItem key={review.id} review={review} />
         ))}
       </ul>
     </section>
   );
-};
+}
 
 export default ReviewsList;

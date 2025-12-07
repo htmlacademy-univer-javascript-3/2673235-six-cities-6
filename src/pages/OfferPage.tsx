@@ -1,53 +1,116 @@
-import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { Link, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import ReviewsList from '../components/ReviewsList';
-import type { Review } from '../components/ReviewItem';
 import CommentForm from '../components/CommentForm';
 import Map from '../components/Map';
 import OffersList from '../components/OffersList';
-import type { RootState } from '../store';
+import type { RootState, AppDispatch } from '../store';
 import type { Offer } from '../store/reducer';
+import { AuthorizationStatus } from '../store/const';
+import { logoutAction } from '../store/action';
+import type { Review } from '../types/review';
 
 export default function OfferPage() {
   const { id } = useParams<{ id: string }>();
-  const allOffers = useSelector((state: RootState) => state.offers);
+  const dispatch = useDispatch<AppDispatch>();
 
-  const gallery = [
-    { id: 'room', src: 'img/room.jpg' },
-    { id: 'ap-01-a', src: 'img/apartment-01.jpg' },
-    { id: 'ap-02', src: 'img/apartment-02.jpg' },
-    { id: 'ap-03', src: 'img/apartment-03.jpg' },
-    { id: 'studio-01', src: 'img/studio-01.jpg' },
-    { id: 'ap-01-b', src: 'img/apartment-01.jpg' },
-  ];
+  const offers = useSelector((state: RootState) => state.offers);
+  const authorizationStatus = useSelector(
+    (state: RootState) => state.authorizationStatus,
+  );
+  const user = useSelector((state: RootState) => state.user);
+
+  const currentOffer: Offer | null =
+    offers.find((offer) => offer.id === id) ?? null;
+
+  if (!currentOffer) {
+    return (
+      <div className="page page--gray page--main">
+        <header className="header">
+          <div className="container">
+            <div className="header__wrapper">
+              <div className="header__left">
+                <Link
+                  className="header__logo-link header__logo-link--active"
+                  to="/"
+                >
+                  <img
+                    className="header__logo"
+                    src="img/logo.svg"
+                    alt="6 cities logo"
+                    width="81"
+                    height="41"
+                  />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="page__main">
+          <div className="container">
+            <section className="property">
+              <h1>Offer not found</h1>
+              <Link to="/" className="button">
+                Back to main page
+              </Link>
+            </section>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  const isAuth = authorizationStatus === AuthorizationStatus.Auth;
+
+  const nearOffers: Offer[] = offers
+    .filter(
+      (offer) =>
+        offer.city === currentOffer.city && offer.id !== currentOffer.id,
+    )
+    .slice(0, 3);
+
+  const ratingWidth = `${Math.round(currentOffer.rating) * 20}%`;
+
+  const offerType =
+    currentOffer.type.charAt(0).toUpperCase() + currentOffer.type.slice(1);
+
+  const mapOffers: Offer[] = [currentOffer, ...nearOffers];
 
   const reviews: Review[] = [
-    {
-      id: 'r2',
-      userName: 'Katy',
-      avatarUrl: 'img/avatar-angelina.jpg',
-      rating: 5,
-      comment: 'Great location, clean apartment, friendly host.',
-      date: '2020-05-12',
-    },
     {
       id: 'r1',
       userName: 'Max',
       avatarUrl: 'img/avatar-max.jpg',
       rating: 4,
       comment:
-        'A quiet cozy and picturesque place by the canal. Building is from 18th century.',
+        'A quiet cozy and picturesque that hides behind a a river by the unique lightness of Amsterdam.',
       date: '2019-04-24',
+    },
+    {
+      id: 'r2',
+      userName: 'Angelina',
+      avatarUrl: 'img/avatar-angelina.jpg',
+      rating: 5,
+      comment:
+        'The house is very well located and is very comfortable. Beautiful interior and beautiful view from the window.',
+      date: '2019-05-01',
     },
   ];
 
-  const currentOffer = allOffers.find((o) => o.id === id) ?? null;
+  const handleSignOutClick = (evt: React.MouseEvent<HTMLAnchorElement>) => {
+    evt.preventDefault();
+    dispatch(logoutAction());
+  };
 
-  const nearOffers: Offer[] = currentOffer
-    ? allOffers
-      .filter((o) => o.city === currentOffer.city && o.id !== currentOffer.id)
-      .slice(0, 3)
-    : [];
+  const galleryImages = [
+    'img/room.jpg',
+    'img/apartment-01.jpg',
+    'img/apartment-02.jpg',
+    'img/apartment-03.jpg',
+    'img/studio-01.jpg',
+    'img/apartment-01.jpg',
+  ];
 
   return (
     <div className="page">
@@ -55,24 +118,53 @@ export default function OfferPage() {
         <div className="container">
           <div className="header__wrapper">
             <div className="header__left">
-              <a className="header__logo-link" href="/">
-                <img className="header__logo" src="img/logo.svg" alt="6 cities logo" width="81" height="41" />
-              </a>
+              <Link className="header__logo-link" to="/">
+                <img
+                  className="header__logo"
+                  src="img/logo.svg"
+                  alt="6 cities logo"
+                  width="81"
+                  height="41"
+                />
+              </Link>
             </div>
+
             <nav className="header__nav">
               <ul className="header__nav-list">
-                <li className="header__nav-item user">
-                  <a className="header__nav-link header__nav-link--profile" href="#todo">
-                    <div className="header__avatar-wrapper user__avatar-wrapper"></div>
-                    <span className="header__user-name user__name">Oliver.conner@gmail.com</span>
-                    <span className="header__favorite-count">3</span>
-                  </a>
-                </li>
-                <li className="header__nav-item">
-                  <a className="header__nav-link" href="#todo">
-                    <span className="header__signout">Sign out</span>
-                  </a>
-                </li>
+                {isAuth && user ? (
+                  <>
+                    <li className="header__nav-item user">
+                      <Link
+                        className="header__nav-link header__nav-link--profile"
+                        to="/favorites"
+                      >
+                        <div className="header__avatar-wrapper user__avatar-wrapper" />
+                        <span className="header__user-name user__name">
+                          {user.email}
+                        </span>
+                      </Link>
+                    </li>
+                    <li className="header__nav-item">
+                      <a
+                        className="header__nav-link"
+                        href="#logout"
+                        onClick={handleSignOutClick}
+                      >
+                        <span className="header__signout">Sign out</span>
+                      </a>
+                    </li>
+                  </>
+                ) : (
+                  <li className="header__nav-item user">
+                    <Link
+                      className="header__nav-link header__nav-link--profile"
+                      to="/login"
+                    >
+                      <div className="header__avatar-wrapper user__avatar-wrapper" />
+                      <span className="header__login">Sign in</span>
+                    </Link>
+                  </li>
+                )}
               </ul>
             </nav>
           </div>
@@ -83,9 +175,13 @@ export default function OfferPage() {
         <section className="offer">
           <div className="offer__gallery-container container">
             <div className="offer__gallery">
-              {gallery.map((item) => (
-                <div className="offer__image-wrapper" key={item.id}>
-                  <img className="offer__image" src={item.src} alt="Room" />
+              {galleryImages.map((src) => (
+                <div className="offer__image-wrapper" key={src}>
+                  <img
+                    className="offer__image"
+                    src={src}
+                    alt={currentOffer.title}
+                  />
                 </div>
               ))}
             </div>
@@ -93,29 +189,51 @@ export default function OfferPage() {
 
           <div className="offer__container container">
             <div className="offer__wrapper">
-              <div className="offer__mark">
-                <span>Premium</span>
-              </div>
+              {currentOffer.isPremium && (
+                <div className="offer__mark">
+                  <span>Premium</span>
+                </div>
+              )}
+
               <div className="offer__name-wrapper">
-                <h1 className="offer__name">
-                  Beautiful &amp; luxurious studio at great location
-                </h1>
-                <button className="offer__bookmark-button button" type="button">
-                  <svg className="offer__bookmark-icon" width="31" height="33">
-                    <use xlinkHref="#icon-bookmark"></use>
+                <h1 className="offer__name">{currentOffer.title}</h1>
+                <button
+                  className={`offer__bookmark-button button ${
+                    currentOffer.isFavorite
+                      ? 'offer__bookmark-button--active'
+                      : ''
+                  }`}
+                  type="button"
+                >
+                  <svg
+                    className="offer__bookmark-icon"
+                    width="31"
+                    height="33"
+                  >
+                    <use xlinkHref="#icon-bookmark" />
                   </svg>
-                  <span className="visually-hidden">To bookmarks</span>
+                  <span className="visually-hidden">
+                    {currentOffer.isFavorite
+                      ? 'In bookmarks'
+                      : 'To bookmarks'}
+                  </span>
                 </button>
               </div>
+
               <div className="offer__rating rating">
                 <div className="offer__stars rating__stars">
-                  <span style={{ width: '80%' }}></span>
+                  <span style={{ width: ratingWidth }} />
                   <span className="visually-hidden">Rating</span>
                 </div>
-                <span className="offer__rating-value rating__value">4.8</span>
+                <span className="offer__rating-value rating__value">
+                  {currentOffer.rating.toFixed(1)}
+                </span>
               </div>
+
               <ul className="offer__features">
-                <li className="offer__feature offer__feature--entire">Apartment</li>
+                <li className="offer__feature offer__feature--entire">
+                  {offerType}
+                </li>
                 <li className="offer__feature offer__feature--bedrooms">
                   3 Bedrooms
                 </li>
@@ -123,10 +241,14 @@ export default function OfferPage() {
                   Max 4 adults
                 </li>
               </ul>
+
               <div className="offer__price">
-                <b className="offer__price-value">€120</b>
+                <b className="offer__price-value">
+                  €{currentOffer.price}
+                </b>
                 <span className="offer__price-text">&nbsp;night</span>
               </div>
+
               <div className="offer__inside">
                 <h2 className="offer__inside-title">What&apos;s inside</h2>
                 <ul className="offer__inside-list">
@@ -141,6 +263,7 @@ export default function OfferPage() {
                   <li className="offer__inside-item">Fridge</li>
                 </ul>
               </div>
+
               <div className="offer__host">
                 <h2 className="offer__host-title">Meet the host</h2>
                 <div className="offer__host-user user">
@@ -158,25 +281,24 @@ export default function OfferPage() {
                 </div>
                 <div className="offer__description">
                   <p className="offer__text">
-                    A quiet cozy and picturesque that hides behind a a river by the
-                    unique lightness of Amsterdam. The building is green and from
-                    18th century.
+                    A quiet cozy and picturesque area that hides behind a
+                    river by the unique lightness of Amsterdam.
                   </p>
                   <p className="offer__text">
-                    An independent House, strategically located between Rembrand
-                    Square and National Opera, but where the bustle of the city
-                    comes to rest in this alley flowery and colorful.
+                    The building is green and from 18th century.
                   </p>
                 </div>
               </div>
 
-              <ReviewsList items={reviews} />
-              <CommentForm />
+              <div className="offer__reviews reviews">
+                <ReviewsList items={reviews} />
+                {isAuth && <CommentForm />}
+              </div>
             </div>
           </div>
 
           <section className="offer__map map">
-            <Map offers={nearOffers} />
+            <Map offers={mapOffers} activeOfferId={currentOffer.id} />
           </section>
         </section>
 
@@ -185,7 +307,6 @@ export default function OfferPage() {
             <h2 className="near-places__title">
               Other places in the neighbourhood
             </h2>
-
             <OffersList offers={nearOffers} variant="near" />
           </section>
         </div>

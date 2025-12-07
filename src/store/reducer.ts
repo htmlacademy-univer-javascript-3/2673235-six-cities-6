@@ -29,6 +29,7 @@ export type Offer = {
   location: {
     lat: number;
     lng: number;
+    zoom: number;
   };
 };
 
@@ -37,6 +38,7 @@ export type User = {
   avatarUrl: string;
   email: string;
   isPro: boolean;
+  token: string;
 };
 
 export type State = {

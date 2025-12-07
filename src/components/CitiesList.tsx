@@ -1,31 +1,29 @@
 import type { City } from '../store/reducer';
 
-type Props = {
+type CitiesListProps = {
   cities: City[];
   currentCity: City;
-  onSelect: (c: City) => void;
+  onSelect: (city: City) => void;
 };
 
-export default function CitiesList({ cities, currentCity, onSelect }: Props) {
+function CitiesList({ cities, currentCity, onSelect }: CitiesListProps) {
   return (
     <div className="tabs">
       <section className="locations container">
         <ul className="locations__list tabs__list">
-          {cities.map((c) => (
-            <li className="locations__item" key={c}>
+          {cities.map((city) => (
+            <li className="locations__item" key={city}>
               <a
-                className={
-                  c === currentCity
-                    ? 'locations__item-link tabs__item tabs__item--active'
-                    : 'locations__item-link tabs__item'
-                }
+                className={`locations__item-link tabs__item ${
+                  city === currentCity ? 'tabs__item--active' : ''
+                }`}
                 href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onSelect(c);
+                onClick={(evt) => {
+                  evt.preventDefault();
+                  onSelect(city);
                 }}
               >
-                <span>{c}</span>
+                <span>{city}</span>
               </a>
             </li>
           ))}
@@ -34,3 +32,5 @@ export default function CitiesList({ cities, currentCity, onSelect }: Props) {
     </div>
   );
 }
+
+export default CitiesList;
