@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type MouseEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { RootState } from '../store';
-import { changeCity } from '../store/action';
+import { Link } from 'react-router-dom';
+import type { RootState, AppDispatch } from '../store';
+import { changeCity, logoutAction } from '../store/action';
+import { AuthorizationStatus } from '../store/const';
 import type { City, Offer } from '../store/reducer';
 import OffersList from '../components/OffersList';
 import Map from '../components/Map';
@@ -10,26 +12,31 @@ import SortingOptions, { type SortType } from '../components/SortingOptions';
 import Spinner from '../components/Spinner';
 
 export default function MainPage() {
-  const dispatch = useDispatch();
-  const city = useSelector((s: RootState) => s.city);
-  const allOffers = useSelector((s: RootState) => s.offers);
-  const isOffersLoading = useSelector((s: RootState) => s.isOffersLoading);
+  const dispatch = useDispatch<AppDispatch>();
+
+  const city = useSelector((state: RootState) => state.city);
+  const allOffers = useSelector((state: RootState) => state.offers);
+  const isOffersLoading = useSelector((state: RootState) => state.isOffersLoading);
+  const authorizationStatus = useSelector(
+    (state: RootState) => state.authorizationStatus,
+  );
+  const user = useSelector((state: RootState) => state.user);
 
   const cities: City[] = useMemo(
     () => ['Paris', 'Cologne', 'Brussels', 'Amsterdam', 'Hamburg', 'Dusseldorf'],
     [],
   );
 
-  const filtered: Offer[] = useMemo(
-    () => allOffers.filter((o) => o.city === city),
-    [allOffers, city],
-  );
-
   const [sortType, setSortType] = useState<SortType>('Popular');
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
 
+  const offersForCity: Offer[] = useMemo(
+    () => allOffers.filter((offer) => offer.city === city),
+    [allOffers, city],
+  );
+
   const sortedOffers: Offer[] = useMemo(() => {
-    const copy = [...filtered];
+    const copy = [...offersForCity];
 
     if (sortType === 'PriceLowToHigh') {
       copy.sort((a, b) => a.price - b.price);
@@ -40,15 +47,23 @@ export default function MainPage() {
     }
 
     return copy;
-  }, [filtered, sortType]);
+  }, [offersForCity, sortType]);
 
-  const onSelectCity = (c: City) => {
-    dispatch(changeCity(c));
-    setActiveOfferId(null);
+  const onSelectCity = (value: City) => {
+    dispatch(changeCity(value));
   };
 
-  const handleActiveOfferChange = (id: string | null) => {
+  const handleSortChange = (value: SortType) => {
+    setSortType(value);
+  };
+
+  const handleOfferHover = (id: string | null) => {
     setActiveOfferId(id);
+  };
+
+  const handleSignOutClick = (evt: MouseEvent<HTMLAnchorElement>) => {
+    evt.preventDefault();
+    dispatch(logoutAction());
   };
 
   return (
@@ -57,24 +72,53 @@ export default function MainPage() {
         <div className="container">
           <div className="header__wrapper">
             <div className="header__left">
-              <a className="header__logo-link header__logo-link--active" href="/">
-                <img className="header__logo" src="img/logo.svg" alt="6 cities logo" width="81" height="41" />
-              </a>
+              <Link className="header__logo-link header__logo-link--active" to="/">
+                <img
+                  className="header__logo"
+                  src="img/logo.svg"
+                  alt="6 cities logo"
+                  width="81"
+                  height="41"
+                />
+              </Link>
             </div>
             <nav className="header__nav">
               <ul className="header__nav-list">
-                <li className="header__nav-item user">
-                  <a className="header__nav-link header__nav-link--profile" href="#todo">
-                    <div className="header__avatar-wrapper user__avatar-wrapper"></div>
-                    <span className="header__user-name user__name">Oliver.conner@gmail.com</span>
-                    <span className="header__favorite-count">3</span>
-                  </a>
-                </li>
-                <li className="header__nav-item">
-                  <a className="header__nav-link" href="#todo">
-                    <span className="header__signout">Sign out</span>
-                  </a>
-                </li>
+                {authorizationStatus === AuthorizationStatus.Auth && user ? (
+                  <>
+                    <li className="header__nav-item user">
+                      <Link
+                        className="header__nav-link header__nav-link--profile"
+                        to="/favorites"
+                      >
+                        <div className="header__avatar-wrapper user__avatar-wrapper" />
+                        <span className="header__user-name user__name">
+                          {user.email}
+                        </span>
+                        <span className="header__favorite-count">3</span>
+                      </Link>
+                    </li>
+                    <li className="header__nav-item">
+                      <a
+                        className="header__nav-link"
+                        href="#"
+                        onClick={handleSignOutClick}
+                      >
+                        <span className="header__signout">Sign out</span>
+                      </a>
+                    </li>
+                  </>
+                ) : (
+                  <li className="header__nav-item user">
+                    <Link
+                      className="header__nav-link header__nav-link--profile"
+                      to="/login"
+                    >
+                      <div className="header__avatar-wrapper user__avatar-wrapper" />
+                      <span className="header__login">Sign in</span>
+                    </Link>
+                  </li>
+                )}
               </ul>
             </nav>
           </div>
@@ -89,32 +133,31 @@ export default function MainPage() {
         <div className="cities">
           <div className="cities__places-container container">
             <section className="cities__places places">
+              <h2 className="visually-hidden">Places</h2>
+
               {isOffersLoading ? (
                 <Spinner />
               ) : (
                 <>
-                  <h2 className="visually-hidden">Places</h2>
                   <b className="places__found">
                     {sortedOffers.length} places to stay in {city}
                   </b>
 
-                  <SortingOptions sortType={sortType} onChange={setSortType} />
+                  <SortingOptions sortType={sortType} onChange={handleSortChange} />
 
                   <OffersList
                     offers={sortedOffers}
-                    onActiveChange={handleActiveOfferChange}
+                    onActiveChange={handleOfferHover}
                   />
                 </>
               )}
             </section>
 
-            {!isOffersLoading && (
-              <div className="cities__right-section">
-                <section className="cities__map map">
-                  <Map offers={sortedOffers} activeOfferId={activeOfferId} />
-                </section>
-              </div>
-            )}
+            <div className="cities__right-section">
+              <section className="cities__map map">
+                <Map offers={sortedOffers} activeOfferId={activeOfferId} />
+              </section>
+            </div>
           </div>
         </div>
       </main>
