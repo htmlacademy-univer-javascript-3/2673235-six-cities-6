@@ -15,7 +15,7 @@ function ReviewsList({ items }: ReviewsListProps) {
   return (
     <section className="property__reviews reviews">
       <h2 className="reviews__title">
-        Reviews • <span className="reviews__amount">{limited.length}</span>
+        Reviews • <span className="reviews__amount">{items.length}</span>
       </h2>
       <ul className="reviews__list">
         {limited.map((review) => (

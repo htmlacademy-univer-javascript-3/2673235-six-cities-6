@@ -5,8 +5,15 @@ import {
   setOffersLoading,
   setAuthorizationStatus,
   setUser,
+  loadOffer,
+  loadNearOffers,
+  loadReviews,
+  setOfferLoading,
+  setOfferNotFound,
+  setCommentSending,
 } from './action';
 import { AuthorizationStatus } from './const';
+import type { Review } from '../types/review';
 
 export type City =
   | 'Paris'
@@ -33,6 +40,19 @@ export type Offer = {
   };
 };
 
+export type OfferDetails = Offer & {
+  description: string;
+  bedrooms: number;
+  maxAdults: number;
+  goods: string[];
+  images: string[];
+  host: {
+    name: string;
+    avatarUrl: string;
+    isPro: boolean;
+  };
+};
+
 export type User = {
   name: string;
   avatarUrl: string;
@@ -47,6 +67,12 @@ export type State = {
   isOffersLoading: boolean;
   authorizationStatus: AuthorizationStatus;
   user: User | null;
+  offer: OfferDetails | null;
+  nearOffers: Offer[];
+  reviews: Review[];
+  isOfferLoading: boolean;
+  isOfferNotFound: boolean;
+  isCommentSending: boolean;
 };
 
 const initialState: State = {
@@ -55,6 +81,12 @@ const initialState: State = {
   isOffersLoading: false,
   authorizationStatus: AuthorizationStatus.Unknown,
   user: null,
+  offer: null,
+  nearOffers: [],
+  reviews: [],
+  isOfferLoading: false,
+  isOfferNotFound: false,
+  isCommentSending: false,
 };
 
 export const appReducer = createReducer(initialState, (builder) => {
@@ -73,5 +105,23 @@ export const appReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setUser, (state, action) => {
       state.user = action.payload;
+    })
+    .addCase(loadOffer, (state, action) => {
+      state.offer = action.payload;
+    })
+    .addCase(loadNearOffers, (state, action) => {
+      state.nearOffers = action.payload;
+    })
+    .addCase(loadReviews, (state, action) => {
+      state.reviews = action.payload;
+    })
+    .addCase(setOfferLoading, (state, action) => {
+      state.isOfferLoading = action.payload;
+    })
+    .addCase(setOfferNotFound, (state, action) => {
+      state.isOfferNotFound = action.payload;
+    })
+    .addCase(setCommentSending, (state, action) => {
+      state.isCommentSending = action.payload;
     });
 });
