@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import type { SortType } from '../types/sort-type';
 
 type SortingOptionsProps = {
@@ -13,46 +13,38 @@ const SORTING_OPTIONS: { value: SortType; label: string }[] = [
   { value: 'TopRatedFirst', label: 'Top rated first' },
 ];
 
-function SortingOptions({ sortType, onChange }: SortingOptionsProps) {
+function SortingOptionsComponent({ sortType, onChange }: SortingOptionsProps): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleToggle = () => {
+  const selectedLabel = SORTING_OPTIONS.find((o) => o.value === sortType)?.label ?? 'Popular';
+
+  const handleToggle = useCallback(() => {
     setIsOpen((prev) => !prev);
-  };
+  }, []);
 
-  const handleSelect = (value: SortType) => {
-    onChange(value);
-    setIsOpen(false);
-  };
-
-  const currentLabel =
-    SORTING_OPTIONS.find((option) => option.value === sortType)?.label ??
-    'Popular';
+  const handleSelect = useCallback(
+    (value: SortType) => {
+      onChange(value);
+      setIsOpen(false);
+    },
+    [onChange],
+  );
 
   return (
     <form className="places__sorting" action="#" method="get">
-      <span className="places__sorting-caption">Sort by</span>{' '}
-      <span
-        className="places__sorting-type"
-        tabIndex={0}
-        onClick={handleToggle}
-      >
-        {currentLabel}
+      <span className="places__sorting-caption">Sort by </span>
+      <span className="places__sorting-type" tabIndex={0} onClick={handleToggle}>
+        {selectedLabel}
         <svg className="places__sorting-arrow" width="7" height="4">
           <use xlinkHref="#icon-arrow-select" />
         </svg>
       </span>
-      <ul
-        className={`places__options places__options--custom ${
-          isOpen ? 'places__options--opened' : ''
-        }`}
-      >
+
+      <ul className={`places__options places__options--custom ${isOpen ? 'places__options--opened' : ''}`}>
         {SORTING_OPTIONS.map((option) => (
           <li
             key={option.value}
-            className={`places__option ${
-              option.value === sortType ? 'places__option--active' : ''
-            }`}
+            className={`places__option ${option.value === sortType ? 'places__option--active' : ''}`}
             tabIndex={0}
             onClick={() => handleSelect(option.value)}
           >
@@ -63,5 +55,7 @@ function SortingOptions({ sortType, onChange }: SortingOptionsProps) {
     </form>
   );
 }
+
+const SortingOptions = memo(SortingOptionsComponent);
 
 export default SortingOptions;
