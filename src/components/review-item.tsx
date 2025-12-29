@@ -15,28 +15,22 @@ function toMonthYear(date: string): string {
   });
 }
 
-function ReviewItem({ review }: ReviewItemProps) {
-  const ratingWidth = `${Math.round(review.rating) * 20}%`;
-  const avatar = review.avatarUrl ?? 'img/avatar.svg';
+function ReviewItem({ review }: ReviewItemProps): JSX.Element {
+  const ratingWidth = Math.round(review.rating) * 20;
 
   return (
     <li className="reviews__item">
       <div className="reviews__user user">
         <div className="reviews__avatar-wrapper user__avatar-wrapper">
-          <img
-            className="reviews__avatar user__avatar"
-            src={avatar}
-            alt={review.userName}
-            width="54"
-            height="54"
-          />
+          <img className="reviews__avatar user__avatar" src={review.avatarUrl ?? 'img/avatar.svg'} width="54" height="54" alt="Reviews avatar" />
         </div>
         <span className="reviews__user-name">{review.userName}</span>
       </div>
+
       <div className="reviews__info">
         <div className="reviews__rating rating">
           <div className="reviews__stars rating__stars">
-            <span style={{ width: ratingWidth }} />
+            <span style={{ width: `${ratingWidth}%` }} />
             <span className="visually-hidden">Rating</span>
           </div>
         </div>

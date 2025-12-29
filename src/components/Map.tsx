@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import L, { Map as LeafletMap, LayerGroup } from 'leaflet';
-import type { Offer } from '../store/reducer';
+import type { Offer } from '../store/types';
 
 type MapProps = {
   offers: Offer[];
@@ -19,7 +19,7 @@ const activeIcon = L.icon({
   iconAnchor: [13.5, 39] as [number, number],
 });
 
-export default function Map({ offers, activeOfferId }: MapProps) {
+function MapComponent({ offers, activeOfferId }: MapProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markersRef = useRef<LayerGroup | null>(null);
@@ -29,23 +29,16 @@ export default function Map({ offers, activeOfferId }: MapProps) {
       return;
     }
 
-    const firstOffer = offers[0];
-    const center: [number, number] = [
-      firstOffer.location.lat,
-      firstOffer.location.lng,
-    ];
-    const zoom = firstOffer.location.zoom;
+    const { lat, lng, zoom } = offers[0].location;
+    const center: [number, number] = [lat, lng];
 
-    const map = L.map(containerRef.current).setView(center, zoom);
+    mapRef.current = L.map(containerRef.current).setView(center, zoom);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(mapRef.current);
 
-    const markers = L.layerGroup().addTo(map);
-
-    mapRef.current = map;
-    markersRef.current = markers;
+    markersRef.current = L.layerGroup().addTo(mapRef.current);
   }, [offers]);
 
   useEffect(() => {
@@ -57,15 +50,14 @@ export default function Map({ offers, activeOfferId }: MapProps) {
 
     offers.forEach((offer) => {
       const icon = offer.id === activeOfferId ? activeIcon : defaultIcon;
-
-      const position: [number, number] = [
-        offer.location.lat,
-        offer.location.lng,
-      ];
-
+      const position: [number, number] = [offer.location.lat, offer.location.lng];
       L.marker(position, { icon }).addTo(markersRef.current as LayerGroup);
     });
   }, [offers, activeOfferId]);
 
   return <div style={{ height: '100%' }} ref={containerRef} />;
 }
+
+const Map = memo(MapComponent);
+
+export default Map;
